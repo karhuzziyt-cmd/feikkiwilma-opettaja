@@ -19,7 +19,15 @@
         .wilma-logo { margin-bottom: 30px; }
         .login-box { width: 100%; max-width: 300px; background: #fff; padding: 20px; border-radius: 12px; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-blue { width: 100%; padding: 12px; background: var(--wilma-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-blue { width: 100%; padding: 12px; background: var(--wilma-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        
+        /* Google-nappi */
+        .google-btn { 
+            width: 100%; background: white; border: 1px solid #ddd; padding: 10px; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 500; 
+        }
+        .separator { margin: 15px 0; color: #ccc; font-size: 12px; display: flex; align-items: center; }
+        .separator::before, .separator::after { content: ""; flex: 1; border-bottom: 1px solid #eee; margin: 0 10px; }
 
         /* YLEISET */
         .header { background: var(--wilma-blue); color: white; padding: 30px 15px 50px; text-align: center; }
@@ -57,6 +65,13 @@
             <input type="email" id="emailInput" placeholder="Sähköposti">
             <input type="password" id="passInput" placeholder="Salasana">
             <button class="btn-blue" id="emailLoginBtn">KIRJAUDU</button>
+            
+            <div class="separator">TAI</div>
+            
+            <button class="google-btn" id="googleLoginBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Jatka Googlella
+            </button>
         </div>
     </div>
 
@@ -100,6 +115,8 @@
                 <div class="info-box" id="detTeacher"></div>
                 <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase;">Comments</label>
                 <div class="info-box" id="detComment"></div>
+                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase;">Duration</label>
+                <div class="info-box" id="detDuration"></div>
             </div>
         </div>
     </div>
@@ -130,13 +147,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
         // NÄKYMIEN VAIHTO
         window.showView = (view) => {
             document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
             document.getElementById('messagesView').classList.toggle('hidden', view !== 'messages');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            const activeItem = [...document.querySelectorAll('.nav-item')].find(item => item.innerText.toLowerCase().includes(view));
+            if(activeItem) activeItem.classList.add('active');
         };
 
         // MERKINNÄT
@@ -146,6 +165,7 @@
             document.getElementById('detGroup').innerText = n.subject || "Yleinen";
             document.getElementById('detTeacher').innerText = n.teacher;
             document.getElementById('detComment').innerText = n.comment || "Ei lisätietoja.";
+            document.getElementById('detDuration').innerText = n.duration || "45";
             document.getElementById('detDate').innerText = n.date ? n.date.toDate().toLocaleString('fi-FI') : "";
             document.getElementById('detailPage').style.display = "block";
         };
@@ -207,9 +227,16 @@
             }
         });
 
-        document.getElementById('emailLoginBtn').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passInput').value);
+        // Kirjautumistoiminnot
+        document.getElementById('googleLoginBtn').onclick = () => {
+            signInWithPopup(auth, provider).catch(err => alert("Google-kirjautumisvirhe: " + err.message));
         };
+        
+        document.getElementById('emailLoginBtn').onclick = () => {
+            signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passInput').value)
+            .catch(err => alert("Kirjautumisvirhe: " + err.message));
+        };
+        
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
     </script>
 </body>
