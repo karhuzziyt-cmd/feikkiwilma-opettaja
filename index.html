@@ -17,126 +17,148 @@
             background-color: #ffffff;
             margin: 0;
             padding-bottom: 80px;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* ETUSIVUN YLÄOSA */
+        /* 1. KIRJAUTUMISSIVU */
+        .auth-container {
+            text-align: center;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .wilma-logo {
+            color: var(--wilma-blue);
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .login-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 16px;
+        }
+
+        /* 2. ETUSIVU */
         .header {
             background-color: var(--wilma-blue);
             color: white;
-            padding: 20px 15px 40px;
+            padding: 30px 15px 50px;
             text-align: center;
         }
 
         .profile-icon {
-            width: 80px; height: 80px;
+            width: 70px; height: 70px;
             background: white; border-radius: 50%;
-            margin: 0 auto 10px;
+            margin: 0 auto 12px;
             display: flex; align-items: center; justify-content: center;
         }
 
-        .profile-name { font-size: 18px; font-weight: 500; }
-
-        /* ETUSIVUN KORTIT */
         .container { padding: 0 15px; }
         .section-title { color: var(--text-gray); font-size: 12px; margin: 25px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         
+        /* MERKINTÄKORTIT */
         .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .note-card {
             background: white; border: 1px solid var(--border-light);
             border-radius: 12px; padding: 12px;
             border-left: 6px solid; cursor: pointer;
+            min-height: 95px;
             display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 90px;
         }
 
-        .note-reason { font-weight: bold; font-size: 15px; margin-bottom: 2px; }
-        .note-sub { font-size: 13px; color: var(--text-gray); line-height: 1.2; }
-
-        /* YKSITYISKOHTAINEN NÄKYMÄ */
+        /* 3. YKSITYISKOHTAINEN NÄKYMÄ */
         #detailPage {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--detail-bg); z-index: 1000;
             display: none; overflow-y: auto;
         }
 
-        .detail-header { background: var(--wilma-blue); color: white; padding: 15px; font-size: 24px; }
-        
+        .detail-header { background: var(--wilma-blue); color: white; padding: 15px; font-size: 28px; }
         .detail-content { padding: 20px; text-align: center; }
-        .detail-circle { width: 55px; height: 55px; border-radius: 50%; margin: 0 auto 10px; }
-        .detail-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; color: #000; }
-        .detail-date { color: #007aff; font-size: 15px; margin-bottom: 25px; font-weight: 500; }
-
-        .info-group { text-align: left; margin-bottom: 20px; }
-        .info-label { font-size: 12px; color: var(--text-gray); text-transform: uppercase; font-weight: 600; margin-left: 5px; margin-bottom: 5px; display: block; }
-        .info-box { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; font-size: 15px; color: #333; }
+        .info-box { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: left; margin-bottom: 15px; font-size: 15px; }
+        .info-label { font-size: 11px; color: var(--text-gray); text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: bold; }
 
         /* ALAPALKKI */
         .footer-nav {
             position: fixed; bottom: 0; width: 100%; background: #f9f9f9;
-            display: flex; border-top: 1px solid #ddd; padding: 10px 0; z-index: 100;
+            display: flex; border-top: 1px solid #ddd; padding: 12px 0;
         }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text-gray); }
-        .nav-item.active { color: var(--wilma-blue); font-weight: bold; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="mainPage">
+    <div id="authPage" class="auth-container">
+        <div class="wilma-logo">Wilma</div>
+        <button id="loginBtn" class="login-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Kirjaudu Google-tilillä
+        </button>
+    </div>
+
+    <div id="mainPage" class="hidden">
         <div class="header">
             <div class="profile-icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" width="50" style="opacity:0.8">
+                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" width="45" style="opacity:0.7">
             </div>
-            <div id="userName" class="profile-name">Ladataan...</div>
+            <div id="userName" style="font-size: 20px; font-weight: 500;"></div>
+            <div id="logoutBtn" style="font-size: 11px; margin-top: 12px; opacity: 0.6; cursor: pointer;">Kirjaudu ulos</div>
         </div>
+        
         <div class="container">
             <div class="section-title">Lesson Notes</div>
             <div id="notesGrid" class="notes-grid"></div>
+        </div>
+
+        <div class="footer-nav">
+            <div class="nav-item" style="color: #003366; font-weight: bold;">🏠<br>Home</div>
+            <div class="nav-item">💬<br>Messages</div>
+            <div class="nav-item">🕒<br>Schedule</div>
         </div>
     </div>
 
     <div id="detailPage">
         <div class="detail-header">
-            <span style="cursor:pointer" onclick="closeDetails()">‹</span>
+            <span style="cursor:pointer; padding: 10px;" onclick="closeDetails()">‹</span>
         </div>
         <div class="detail-content">
-            <div id="detCircle" class="detail-circle"></div>
-            <div id="detReason" class="detail-title"></div>
-            <div id="detDate" class="detail-date"></div>
+            <div id="detCircle" style="width:55px; height:55px; border-radius:50%; margin: 0 auto 12px;"></div>
+            <div id="detReason" style="font-size:22px; font-weight:bold; margin-bottom: 5px;"></div>
+            <div id="detDate" style="color:#007aff; margin-bottom:25px; font-weight: 500;"></div>
 
-            <div class="info-group">
-                <span class="info-label">Group</span>
+            <div style="text-align: left;">
+                <label class="info-label">Group</label>
                 <div class="info-box" id="detGroup"></div>
-            </div>
 
-            <div class="info-group">
-                <span class="info-label">Teacher</span>
+                <label class="info-label">Teacher</label>
                 <div class="info-box" id="detTeacher"></div>
-            </div>
 
-            <div class="info-group">
-                <span class="info-label">Comments</span>
+                <label class="info-label">Comments</label>
                 <div class="info-box" id="detComment"></div>
-            </div>
-            
-            <div class="info-group">
-                <span class="info-label">Duration</span>
-                <div class="info-box" id="detDuration">45</div>
+                
+                <label class="info-label">Duration</label>
+                <div class="info-box">45</div>
             </div>
         </div>
-    </div>
-
-    <div class="footer-nav">
-        <div class="nav-item active">🏠<br>Home</div>
-        <div class="nav-item">💬<br>Messages</div>
-        <div class="nav-item">🕒<br>Schedule</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnBxP9nN_z1nFB_bD4pgbG4W-uwnyN-jk",
@@ -151,35 +173,30 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Funktio yksityiskohtien avaamiseen
-        window.openDetails = (data) => {
-            const dateObj = data.date ? data.date.toDate() : new Date();
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dateStr = `${days[dateObj.getDay()]} ${dateObj.toLocaleDateString('fi-FI')} ${dateObj.toLocaleTimeString('fi-FI', {hour:'2-digit', minute:'2-digit'})}`;
-
-            document.getElementById('detReason').innerText = data.reason;
-            document.getElementById('detCircle').style.backgroundColor = data.color;
-            document.getElementById('detGroup').innerText = data.subject || "Matematiikka";
-            document.getElementById('detTeacher').innerText = data.teacher;
-            document.getElementById('detComment').innerText = data.comment || "";
-            document.getElementById('detDate').innerText = dateStr;
-            document.getElementById('detDuration').innerText = data.duration || "45";
-            
+        // Avaa merkinnän tiedot
+        window.openDetails = (n) => {
+            document.getElementById('detReason').innerText = n.reason;
+            document.getElementById('detCircle').style.backgroundColor = n.color;
+            document.getElementById('detGroup').innerText = n.subject || "Yleinen";
+            document.getElementById('detTeacher').innerText = n.teacher;
+            document.getElementById('detComment').innerText = n.comment || "Ei lisätietoja.";
+            document.getElementById('detDate').innerText = n.date ? n.date.toDate().toLocaleString('fi-FI') : "12.02.2026 10:45";
             document.getElementById('detailPage').style.display = "block";
-            window.scrollTo(0, 0);
+            window.scrollTo(0,0);
         };
 
-        window.closeDetails = () => {
-            document.getElementById('detailPage').style.display = "none";
-        };
+        window.closeDetails = () => { document.getElementById('detailPage').style.display = "none"; };
 
+        // Autentikaatio ja datan haku
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // DYNAAMINEN NIMI: Käytetään Google-tilin nimeä
+                document.getElementById('authPage').classList.add('hidden');
+                document.getElementById('mainPage').classList.remove('hidden');
+                
+                // Käytetään Google-tilin nimeä
                 document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
 
                 const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase().trim()));
-                
                 onSnapshot(q, (snap) => {
                     const grid = document.getElementById('notesGrid');
                     grid.innerHTML = "";
@@ -190,19 +207,21 @@
                         card.style.borderLeftColor = n.color;
                         card.onclick = () => openDetails(n);
                         card.innerHTML = `
-                            <div>
-                                <div class="note-reason">${n.reason}</div>
-                                <div class="note-sub">${n.teacher}</div>
-                                <div class="note-sub" style="font-size:11px">${n.subject}</div>
-                            </div>
+                            <div style="font-weight:bold; font-size:15px;">${n.reason}</div>
+                            <div style="font-size:13px; color:#888;">${n.teacher}</div>
+                            <div style="font-size:11px; color:#aaa; margin-top:5px; text-align:right;">${n.date ? n.date.toDate().toLocaleDateString('fi-FI') : ''}</div>
                         `;
                         grid.appendChild(card);
                     });
                 });
             } else {
-                signInWithPopup(auth, new GoogleAuthProvider());
+                document.getElementById('authPage').classList.remove('hidden');
+                document.getElementById('mainPage').classList.add('hidden');
             }
         });
+
+        document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
