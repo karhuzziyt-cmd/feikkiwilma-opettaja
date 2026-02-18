@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wilma - Oppilas</title>
+    <style>
+        :root { --wilma-blue: #003366; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; }
+        .header { background: var(--wilma-blue); color: white; padding: 30px 20px; text-align: center; }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .section-title { color: #888; font-size: 12px; font-weight: bold; margin: 20px 0 10px; text-transform: uppercase; }
+        .note { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 8px solid; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .note-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .note-info { font-size: 13px; color: #666; margin: 4px 0; }
+        .note-date { font-size: 11px; color: #aaa; text-align: right; margin-top: 10px; }
+        .login-screen { text-align: center; padding: 50px 20px; }
+        .btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: block; margin: 10px auto; color: white; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="authPage" class="login-screen">
+        <div style="font-size: 50px;">🎓</div>
+        <h2>Wilma</h2>
+        <p>Kirjaudu sisään nähdäksesi merkinnät</p>
+        <button class="btn" style="background:#4285F4;" id="loginGoogle">Kirjaudu Googlella</button>
+        <button class="btn" style="background:#2f2f2f;" id="loginMS">Kirjaudu Microsoftilla</button>
+    </div>
+
+    <div id="mainPage" class="hidden">
+        <div class="header">
+            <div id="userEmail" style="font-size:14px; margin-bottom: 5px;"></div>
+            <a href="#" id="logout" style="color:#ffbcbc; font-size:12px;">Kirjaudu ulos</a>
+        </div>
+        <div class="container">
+            <div class="section-title">LESSON NOTES</div>
+            <div id="notesList">
+                <p style="text-align: center; color: #999; margin-top: 20px;">Ei merkintöjä.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBnBxP9nN_z1nFB_bD4pgbG4W-uwnyN-jk",
+          authDomain: "wilma-feikki.firebaseapp.com",
+          projectId: "wilma-feikki",
+          storageBucket: "wilma-feikki.firebasestorage.app",
+          messagingSenderId: "536302104544",
+          appId: "1:536302104544:web:41526cb87af29f98790585"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authPage').classList.add('hidden');
+                document.getElementById('mainPage').classList.remove('hidden');
+                document.getElementById('userEmail').innerText = user.email;
+                
+                // Haku: vain omat merkinnät, uusin ensin
+                const q = query(
+                    collection(db, "merkinnat"), 
+                    where("targetEmail", "==", user.email.toLowerCase().trim()), 
+                    orderBy("date", "desc")
+                );
+
+                onSnapshot(q, (snap) => {
+                    const list = document.getElementById('notesList');
+                    list.innerHTML = snap.empty ? '<p style="text-align: center; color: #999;">Ei merkintöjä.</p>' : "";
+                    snap.forEach(doc => {
+                        const n = doc.data();
+                        const timestamp = n.date ? n.date.toDate().toLocaleString('fi-FI') : "---";
+                        list.innerHTML += `
+                        <div class="note" style="border-left-color:${n.color}">
+                            <div class="note-title">${n.reason}</div>
+                            <div class="note-info">${n.teacher} • ${n.subject}</div>
+                            <div style="font-size:14px; color:#444;">${n.comment}</div>
+                            <div class="note-date">${timestamp}</div>
+                        </div>`;
+                    });
+                }, (error) => {
+                    console.error("Virhe ladattaessa:", error);
+                });
+            } else {
+                document.getElementById('authPage').classList.remove('hidden');
+                document.getElementById('mainPage').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('loginGoogle').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+        document.getElementById('loginMS').onclick = () => signInWithPopup(auth, new OAuthProvider('microsoft.com'));
+        document.getElementById('logout').onclick = () => signOut(auth);
+    </script>
+</body>
+</html>
