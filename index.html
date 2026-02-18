@@ -7,131 +7,135 @@
     <style>
         :root {
             --wilma-blue: #003366;
-            --mint-green: #a2ffd0;
-            --bg-gray: #f2f2f7;
+            --text-gray: #8e8e93;
+            --border-light: #e5e5ea;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-gray);
+            background-color: #ffffff;
             margin: 0;
             padding-bottom: 80px;
         }
 
-        /* YLÄPALKKI */
+        /* YLÄOSA */
         .header {
             background-color: var(--wilma-blue);
             color: white;
-            padding: 40px 20px 30px;
+            padding: 20px 15px 40px;
             text-align: center;
         }
 
-        .avatar {
-            width: 70px;
-            height: 70px;
-            background-color: var(--mint-green);
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            background-color: white;
             border-radius: 50%;
             margin: 0 auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #004d40;
         }
 
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .section-title { color: #8e8e93; font-size: 13px; font-weight: 600; margin: 15px 0 10px 5px; text-transform: uppercase; }
+        .profile-icon img { width: 50px; opacity: 0.8; }
 
-        /* MERKINTÄKORTTI */
+        .container { padding: 0 15px; }
+
+        .section-title {
+            color: var(--text-gray);
+            font-size: 13px;
+            margin: 25px 0 10px;
+            text-transform: uppercase;
+        }
+
+        /* MERKINTÄKORTIT ETUSIVULLA */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         .note-card {
             background: white;
+            border: 1px solid var(--border-light);
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 8px solid;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: pointer;
+            padding: 12px;
+            border-left: 6px solid;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .note-reason { font-weight: bold; font-size: 16px; color: #000; }
-        .note-details { font-size: 14px; color: #666; margin-top: 2px; }
+        .note-reason {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
 
-        /* MODAL */
-        .modal {
-            display: none; 
+        .note-teacher {
+            font-size: 13px;
+            color: var(--text-gray);
+            line-height: 1.2;
+        }
+
+        .note-time {
+            font-size: 11px;
+            color: var(--text-gray);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* ALAPALKKI */
+        .footer-nav {
             position: fixed;
-            z-index: 1000;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            bottom: 0;
+            width: 100%;
+            background: #f9f9f9;
+            display: flex;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
         }
 
-        .modal-content {
-            background-color: white;
-            margin: 20% auto;
-            padding: 25px;
-            border-radius: 15px;
-            width: 85%;
-            max-width: 400px;
-            position: relative;
-        }
-
-        .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; color: #aaa; cursor: pointer; }
-
-        /* KIRJAUTUMISLOMAKE */
-        .auth-container { text-align: center; padding: 50px 20px; max-width: 350px; margin: auto; }
-        .auth-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .google-btn { background: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .email-btn { background: var(--wilma-blue); color: white; }
-
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text-gray); }
+        .nav-item.active { color: var(--wilma-blue); font-weight: bold; }
+        .nav-icon { font-size: 22px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="noteModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div id="modalTitle" style="font-weight:bold; font-size:18px;"></div>
-            <div id="modalInfo" style="color:#666; margin: 10px 0; border-bottom:1px solid #eee; padding-bottom:10px;"></div>
-            <div id="modalComment" style="font-size:15px;"></div>
-            <div id="modalDate" style="font-size:11px; color:#999; margin-top:15px;"></div>
-        </div>
-    </div>
-
-    <div id="authPage" class="auth-container">
-        <h2 style="color: var(--wilma-blue); font-size: 28px;">Wilma</h2>
-        
-        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <input type="email" id="loginEmail" class="auth-input" placeholder="Sähköposti">
-            <input type="password" id="loginPassword" class="auth-input" placeholder="Salasana">
-            <button class="login-btn email-btn" id="emailSignInBtn">Kirjaudu</button>
-            <p style="font-size: 12px; color: #888;">Tai käytä Googlea:</p>
-            <button class="login-btn google-btn" id="googleLoginBtn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-                Google-kirjautuminen
-            </button>
-        </div>
+    <div id="authPage" style="text-align:center; padding-top:100px;">
+        <h1>Wilma</h1>
+        <button id="loginBtn" style="padding:15px; cursor:pointer;">Kirjaudu Googlella</button>
     </div>
 
     <div id="mainPage" class="hidden">
         <div class="header">
-            <div id="avatarBox" class="avatar"></div>
-            <div id="userName" style="font-weight: bold;">Ladataan...</div>
-            <div id="logoutBtn" style="font-size: 11px; margin-top: 10px; cursor: pointer; opacity: 0.8;">Kirjaudu ulos</div>
+            <div class="profile-icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png">
+            </div>
+            <div id="userName" style="font-size:18px;">Veeti Savolainen</div>
         </div>
 
         <div class="container">
             <div class="section-title">Lesson Notes</div>
-            <div id="notesContainer"></div>
+            <div id="notesGrid" class="notes-grid"></div>
+        </div>
+
+        <div class="footer-nav">
+            <div class="nav-item active"><div class="nav-icon">🏠</div>Home</div>
+            <div class="nav-item"><div class="nav-icon">💬</div>Messages</div>
+            <div class="nav-item"><div class="nav-icon">📢</div>Announcements</div>
+            <div class="nav-item"><div class="nav-icon">🕒</div>Schedule</div>
+            <div class="nav-item"><div class="nav-icon">•••</div>More</div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnBxP9nN_z1nFB_bD4pgbG4W-uwnyN-jk",
@@ -146,57 +150,37 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Modal-toiminnot
-        window.openModal = (reason, info, comment, date) => {
-            document.getElementById('modalTitle').innerText = reason;
-            document.getElementById('modalInfo').innerText = info;
-            document.getElementById('modalComment').innerText = comment || "Ei lisätietoja.";
-            document.getElementById('modalDate').innerText = "Päivämäärä: " + date;
-            document.getElementById('noteModal').style.display = "block";
-        }
-        window.closeModal = () => document.getElementById('noteModal').style.display = "none";
-
-        // Kirjautumisen seuranta
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('mainPage').classList.remove('hidden');
-                
-                const display = user.displayName || user.email.split('@')[0];
-                document.getElementById('userName').innerText = display;
-                document.getElementById('avatarBox').innerText = display[0].toUpperCase();
+                document.getElementById('userName').innerText = user.displayName || "Veeti Savolainen";
 
                 const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase().trim()));
+                
                 onSnapshot(q, (snap) => {
-                    const container = document.getElementById('notesContainer');
-                    container.innerHTML = "";
+                    const grid = document.getElementById('notesGrid');
+                    grid.innerHTML = "";
+                    
                     snap.forEach(doc => {
                         const n = doc.data();
-                        const d = n.date ? n.date.toDate().toLocaleDateString('fi-FI') : '';
-                        const card = document.createElement('div');
-                        card.className = 'note-card';
-                        card.style.borderLeftColor = n.color;
-                        card.innerHTML = `<div class="note-reason">${n.reason}</div><div class="note-details">${n.info || ''}</div>`;
-                        card.onclick = () => openModal(n.reason, n.info, n.comment, d);
-                        container.appendChild(card);
+                        const timeStr = n.date ? n.date.toDate().toLocaleDateString('fi-FI') + " " + n.date.toDate().toLocaleTimeString('fi-FI', {hour:'2-digit', minute:'2-digit'}) : "";
+                        
+                        grid.innerHTML += `
+                            <div class="note-card" style="border-left-color:${n.color}">
+                                <div>
+                                    <div class="note-reason">${n.reason}</div>
+                                    <div class="note-teacher">${n.teacher || ''}</div>
+                                    <div class="note-teacher" style="font-size:12px;">${n.subject || ''}</div>
+                                </div>
+                                <div class="note-time">${timeStr}</div>
+                            </div>`;
                     });
                 });
-            } else {
-                document.getElementById('authPage').classList.remove('hidden');
-                document.getElementById('mainPage').classList.add('hidden');
             }
         });
 
-        // Kirjautumistavat
-        document.getElementById('googleLoginBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
-        
-        document.getElementById('emailSignInBtn').onclick = () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(err => alert("Virhe: " + err.message));
-        };
-
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
     </script>
 </body>
 </html>
