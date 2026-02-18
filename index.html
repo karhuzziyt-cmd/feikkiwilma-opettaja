@@ -18,7 +18,7 @@
             padding-bottom: 80px;
         }
 
-        /* YLÄOSA */
+        /* YLÄPALKKI */
         .header {
             background-color: var(--wilma-blue);
             color: white;
@@ -37,99 +37,109 @@
             justify-content: center;
         }
 
-        .profile-icon img { width: 50px; opacity: 0.8; }
-
+        /* ETUSIVUN KORTIT */
         .container { padding: 0 15px; }
-
-        .section-title {
-            color: var(--text-gray);
-            font-size: 13px;
-            margin: 25px 0 10px;
-            text-transform: uppercase;
-        }
-
-        /* MERKINTÄKORTIT ETUSIVULLA */
-        .notes-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
+        .section-title { color: var(--text-gray); font-size: 12px; margin: 25px 0 10px; text-transform: uppercase; }
+        
+        .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
         .note-card {
             background: white;
             border: 1px solid var(--border-light);
             border-radius: 12px;
             padding: 12px;
             border-left: 6px solid;
-            min-height: 90px;
+            cursor: pointer;
+        }
+
+        .note-reason { font-weight: bold; font-size: 15px; }
+        .note-sub { font-size: 13px; color: var(--text-gray); margin-top: 2px; }
+
+        /* YKSITYISKOHTAINEN NÄKYMÄ (MODAL) */
+        #detailPage {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f2f2f7;
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .detail-header {
+            background-color: var(--wilma-blue);
+            color: white;
+            padding: 15px;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
         }
 
-        .note-reason {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 2px;
+        .back-btn { font-size: 30px; cursor: pointer; margin-right: 20px; }
+
+        .detail-content { padding: 20px; text-align: center; }
+        .detail-circle { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 10px; }
+        .detail-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+        .detail-date { color: #007aff; font-size: 15px; margin-bottom: 25px; }
+
+        .info-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: left;
+            margin-bottom: 20px;
         }
 
-        .note-teacher {
-            font-size: 13px;
-            color: var(--text-gray);
-            line-height: 1.2;
-        }
-
-        .note-time {
-            font-size: 11px;
-            color: var(--text-gray);
-            text-align: right;
-            margin-top: 5px;
-        }
+        .info-label { font-size: 12px; color: var(--text-gray); text-transform: uppercase; margin-bottom: 8px; display: block; }
 
         /* ALAPALKKI */
         .footer-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #f9f9f9;
-            display: flex;
-            padding: 10px 0;
-            border-top: 1px solid #ddd;
+            position: fixed; bottom: 0; width: 100%; background: #f9f9f9;
+            display: flex; border-top: 1px solid #ddd; padding: 10px 0;
         }
-
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text-gray); }
-        .nav-item.active { color: var(--wilma-blue); font-weight: bold; }
-        .nav-icon { font-size: 22px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="authPage" style="text-align:center; padding-top:100px;">
-        <h1>Wilma</h1>
-        <button id="loginBtn" style="padding:15px; cursor:pointer;">Kirjaudu Googlella</button>
-    </div>
-
-    <div id="mainPage" class="hidden">
+    <div id="mainPage">
         <div class="header">
-            <div class="profile-icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png">
-            </div>
-            <div id="userName" style="font-size:18px;">Veeti Savolainen</div>
+            <div class="profile-icon"><img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" width="50"></div>
+            <div id="userName">Veeti Savolainen</div>
         </div>
-
         <div class="container">
             <div class="section-title">Lesson Notes</div>
             <div id="notesGrid" class="notes-grid"></div>
         </div>
+    </div>
 
-        <div class="footer-nav">
-            <div class="nav-item active"><div class="nav-icon">🏠</div>Home</div>
-            <div class="nav-item"><div class="nav-icon">💬</div>Messages</div>
-            <div class="nav-item"><div class="nav-icon">📢</div>Announcements</div>
-            <div class="nav-item"><div class="nav-icon">🕒</div>Schedule</div>
-            <div class="nav-item"><div class="nav-icon">•••</div>More</div>
+    <div id="detailPage">
+        <div class="detail-header">
+            <div class="back-btn" onclick="closeDetails()">‹</div>
         </div>
+        <div class="detail-content">
+            <div id="detCircle" class="detail-circle"></div>
+            <div id="detReason" class="detail-title"></div>
+            <div id="detDate" class="detail-date"></div>
+
+            <label class="info-label" style="text-align:left">Group</label>
+            <div class="info-box" id="detGroup"></div>
+
+            <label class="info-label" style="text-align:left">Teacher</label>
+            <div class="info-box" id="detTeacher"></div>
+
+            <label class="info-label" style="text-align:left">Comments</label>
+            <div class="info-box" id="detComment"></div>
+            
+            <label class="info-label" style="text-align:left">Duration</label>
+            <div class="info-box">45</div>
+        </div>
+    </div>
+
+    <div class="footer-nav">
+        <div class="nav-item">🏠<br>Home</div>
+        <div class="nav-item">💬<br>Messages</div>
+        <div class="nav-item">🕒<br>Schedule</div>
     </div>
 
     <script type="module">
@@ -150,37 +160,42 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        window.openDetails = (data) => {
+            document.getElementById('detReason').innerText = data.reason;
+            document.getElementById('detCircle').style.backgroundColor = data.color;
+            document.getElementById('detGroup').innerText = data.subject || "Matematiikka";
+            document.getElementById('detTeacher').innerText = data.teacher;
+            document.getElementById('detComment').innerText = data.comment;
+            document.getElementById('detDate').innerText = "Tänään klo 12.00"; 
+            document.getElementById('detailPage').style.display = "block";
+        };
+
+        window.closeDetails = () => {
+            document.getElementById('detailPage').style.display = "none";
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('authPage').classList.add('hidden');
-                document.getElementById('mainPage').classList.remove('hidden');
-                document.getElementById('userName').innerText = user.displayName || "Veeti Savolainen";
-
                 const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase().trim()));
-                
                 onSnapshot(q, (snap) => {
                     const grid = document.getElementById('notesGrid');
                     grid.innerHTML = "";
-                    
                     snap.forEach(doc => {
                         const n = doc.data();
-                        const timeStr = n.date ? n.date.toDate().toLocaleDateString('fi-FI') + " " + n.date.toDate().toLocaleTimeString('fi-FI', {hour:'2-digit', minute:'2-digit'}) : "";
-                        
-                        grid.innerHTML += `
-                            <div class="note-card" style="border-left-color:${n.color}">
-                                <div>
-                                    <div class="note-reason">${n.reason}</div>
-                                    <div class="note-teacher">${n.teacher || ''}</div>
-                                    <div class="note-teacher" style="font-size:12px;">${n.subject || ''}</div>
-                                </div>
-                                <div class="note-time">${timeStr}</div>
-                            </div>`;
+                        const card = document.createElement('div');
+                        card.className = 'note-card';
+                        card.style.borderLeftColor = n.color;
+                        card.onclick = () => openDetails(n);
+                        card.innerHTML = `<div class="note-reason">${n.reason}</div>
+                                          <div class="note-sub">${n.teacher}</div>
+                                          <div class="note-sub" style="font-size:11px">${n.subject}</div>`;
+                        grid.appendChild(card);
                     });
                 });
+            } else {
+                signInWithPopup(auth, new GoogleAuthProvider());
             }
         });
-
-        document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
     </script>
 </body>
 </html>
