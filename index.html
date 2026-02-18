@@ -29,10 +29,10 @@
         }
 
         .wilma-logo {
-            color: var(--wilma-blue);
-            font-size: 48px;
-            font-weight: bold;
             margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .login-box {
@@ -87,27 +87,32 @@
             font-weight: 500;
         }
 
-        /* PÄÄNÄKYMÄN TYYLIT */
+        /* PÄÄNÄKYMÄ */
         .header { background: var(--wilma-blue); color: white; padding: 30px 15px 50px; text-align: center; }
-        .profile-icon { width: 70px; height: 70px; background: white; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; }
+        .profile-icon { width: 70px; height: 70px; background: white; border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .container { padding: 0 15px; }
         .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .note-card { background: white; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; border-left: 6px solid; cursor: pointer; min-height: 95px; }
         
+        /* YKSITYISKOHTAINEN NÄKYMÄ */
         #detailPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--detail-bg); z-index: 1000; display: none; overflow-y: auto; }
-        .detail-header { background: var(--wilma-blue); color: white; padding: 15px; font-size: 28px; }
+        .detail-header { background: var(--wilma-blue); color: white; padding: 15px; font-size: 28px; display: flex; align-items: center; }
         .detail-content { padding: 20px; text-align: center; }
         .info-box { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: left; margin-bottom: 15px; }
         
-        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #f9f9f9; display: flex; border-top: 1px solid #ddd; padding: 12px 0; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text-gray); }
+        /* ALAPALKKI JA ILMOITUSPALLOT */
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #f9f9f9; display: flex; border-top: 1px solid #ddd; padding: 12px 0; z-index: 999; }
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text-gray); position: relative; }
+        .nav-badge { position: absolute; top: -5px; right: 15%; background: #d32f2f; color: white; font-size: 9px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div id="authPage" class="auth-container">
-        <div class="wilma-logo">Wilma</div>
+        <div class="wilma-logo">
+            <img src="logo.png" alt="Wilma" style="max-width: 180px; height: auto;">
+        </div>
         
         <div class="login-box">
             <input type="email" id="emailInput" placeholder="Sähköposti">
@@ -139,24 +144,36 @@
 
         <div class="footer-nav">
             <div class="nav-item" style="color: #003366; font-weight: bold;">🏠<br>Home</div>
-            <div class="nav-item">💬<br>Messages</div>
+            <div class="nav-item">
+                <div class="nav-badge">19</div>
+                💬<br>Messages
+            </div>
             <div class="nav-item">🕒<br>Schedule</div>
+            <div class="nav-item">
+                <div class="nav-badge">1</div>
+                •••<br>More
+            </div>
         </div>
     </div>
 
     <div id="detailPage">
-        <div class="detail-header"><span style="cursor:pointer" onclick="closeDetails()">‹</span></div>
+        <div class="detail-header"><span style="cursor:pointer; padding: 0 10px;" onclick="closeDetails()">‹</span></div>
         <div class="detail-content">
             <div id="detCircle" style="width:55px; height:55px; border-radius:50%; margin: 0 auto 12px;"></div>
             <div id="detReason" style="font-size:22px; font-weight:bold; margin-bottom: 5px;"></div>
             <div id="detDate" style="color:#007aff; margin-bottom:25px;"></div>
             <div style="text-align: left;">
-                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase;">Group</label>
+                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase; margin-left: 5px;">Group</label>
                 <div class="info-box" id="detGroup"></div>
-                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase;">Teacher</label>
+                
+                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase; margin-left: 5px;">Teacher</label>
                 <div class="info-box" id="detTeacher"></div>
-                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase;">Comments</label>
+                
+                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase; margin-left: 5px;">Comments</label>
                 <div class="info-box" id="detComment"></div>
+
+                <label style="font-size:11px; color:var(--text-gray); text-transform:uppercase; margin-left: 5px;">Duration</label>
+                <div class="info-box">45</div>
             </div>
         </div>
     </div>
@@ -179,6 +196,8 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        let isFirstLoad = true;
+
         window.openDetails = (n) => {
             document.getElementById('detReason').innerText = n.reason;
             document.getElementById('detCircle').style.backgroundColor = n.color;
@@ -191,15 +210,37 @@
 
         window.closeDetails = () => { document.getElementById('detailPage').style.display = "none"; };
 
+        function showNotification(reason, teacher) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Uusi merkintä Wilmassa", {
+                    body: `${reason}: ${teacher}`,
+                    icon: "logo.png"
+                });
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('mainPage').classList.remove('hidden');
                 document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
 
+                if ("Notification" in window) Notification.requestPermission();
+
                 const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase().trim()));
+                
                 onSnapshot(q, (snap) => {
                     const grid = document.getElementById('notesGrid');
+                    
+                    // Ilmoitus uusista merkinnöistä
+                    if (!isFirstLoad && snap.docChanges().length > 0) {
+                        snap.docChanges().forEach(change => {
+                            if (change.type === "added") {
+                                showNotification(change.doc.data().reason, change.doc.data().teacher);
+                            }
+                        });
+                    }
+
                     grid.innerHTML = "";
                     snap.forEach(doc => {
                         const n = doc.data();
@@ -210,10 +251,12 @@
                         card.innerHTML = `<div style="font-weight:bold">${n.reason}</div><div style="font-size:13px;color:#888;">${n.teacher}</div>`;
                         grid.appendChild(card);
                     });
+                    isFirstLoad = false;
                 });
             } else {
                 document.getElementById('authPage').classList.remove('hidden');
                 document.getElementById('mainPage').classList.add('hidden');
+                isFirstLoad = true;
             }
         });
 
