@@ -15,13 +15,22 @@
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: #ffffff; margin: 0; padding-bottom: 80px; }
 
         /* KIRJAUTUMINEN */
-        .auth-container { text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; }
-        .wilma-logo { margin-bottom: 30px; }
+        .auth-container { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .wilma-logo { margin-bottom: 10px; }
+        
+        /* UUSI BIO-TYYLI */
+        .login-bio { 
+            font-size: 14px; 
+            color: var(--text-gray); 
+            margin-bottom: 25px; 
+            max-width: 280px; 
+            line-height: 1.4;
+        }
+
         .login-box { width: 100%; max-width: 300px; background: #fff; padding: 20px; border-radius: 12px; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn-blue { width: 100%; padding: 12px; background: var(--wilma-blue); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         
-        /* Google-nappi */
         .google-btn { 
             width: 100%; background: white; border: 1px solid #ddd; padding: 10px; border-radius: 8px; 
             display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 500; 
@@ -35,11 +44,9 @@
         .container { padding: 0 15px; }
         .hidden { display: none; }
 
-        /* MERKINNÄT (HOME) */
+        /* MERKINNÄT & VIESTIT (Samalla tavalla kuin aiemmin) */
         .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .note-card { background: white; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; border-left: 6px solid; cursor: pointer; min-height: 95px; }
-
-        /* VIESTIT (MESSAGES) */
         .message-item { padding: 15px; border-bottom: 1px solid var(--border-light); cursor: pointer; }
         .msg-sender { font-weight: bold; font-size: 15px; margin-bottom: 3px; }
         .msg-subject { font-size: 14px; color: #333; }
@@ -61,13 +68,16 @@
 
     <div id="authPage" class="auth-container">
         <div class="wilma-logo"><img src="logo.png" alt="Wilma" style="max-width: 180px;"></div>
+        
+        <div id="loginBio" class="login-bio">
+            Tervetuloa käyttämään Wilmaa. Kirjaudu sisään sähköpostillasi tai Google-tililläsi.
+        </div>
+
         <div class="login-box">
             <input type="email" id="emailInput" placeholder="Sähköposti">
             <input type="password" id="passInput" placeholder="Salasana">
             <button class="btn-blue" id="emailLoginBtn">KIRJAUDU</button>
-            
             <div class="separator">TAI</div>
-            
             <button class="google-btn" id="googleLoginBtn">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Jatka Googlella
@@ -81,17 +91,14 @@
             <div id="userName" style="font-size: 20px; font-weight: 500;"></div>
             <div id="logoutBtn" style="font-size: 11px; margin-top: 12px; opacity: 0.6; cursor: pointer;">Kirjaudu ulos</div>
         </div>
-        
         <div id="homeView" class="container">
             <div style="color:var(--text-gray); font-size:12px; margin:25px 0 10px; text-transform:uppercase;">Lesson Notes</div>
             <div id="notesGrid" class="notes-grid"></div>
         </div>
-
         <div id="messagesView" class="hidden">
             <div style="padding: 15px; font-weight: bold; border-bottom: 1px solid #eee;">Inbox</div>
             <div id="messagesList"></div>
         </div>
-
         <div class="footer-nav">
             <div class="nav-item active" onclick="showView('home')">🏠<br>Home</div>
             <div class="nav-item" onclick="showView('messages')">
@@ -149,16 +156,18 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // NÄKYMIEN VAIHTO
+        /* Voit muuttaa bio-tekstiä koodista myös näin:
+           document.getElementById('loginBio').innerText = "Tämä on uusi teksti"; */
+
         window.showView = (view) => {
             document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
             document.getElementById('messagesView').classList.toggle('hidden', view !== 'messages');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const activeItem = [...document.querySelectorAll('.nav-item')].find(item => item.innerText.toLowerCase().includes(view));
-            if(activeItem) activeItem.classList.add('active');
+            const items = document.querySelectorAll('.nav-item');
+            if(view === 'home') items[0].classList.add('active');
+            if(view === 'messages') items[1].classList.add('active');
         };
 
-        // MERKINNÄT
         window.openDetails = (n) => {
             document.getElementById('detReason').innerText = n.reason;
             document.getElementById('detCircle').style.backgroundColor = n.color;
@@ -171,7 +180,6 @@
         };
         window.closeDetails = () => { document.getElementById('detailPage').style.display = "none"; };
 
-        // VIESTIT
         window.openMsgDetails = (m) => {
             document.getElementById('msgDetSubject').innerText = m.subject;
             document.getElementById('msgDetInfo').innerText = `From: ${m.sender} | ${m.date ? m.date.toDate().toLocaleString('fi-FI') : ''}`;
@@ -185,10 +193,8 @@
                 document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('mainPage').classList.remove('hidden');
                 document.getElementById('userName').innerText = user.displayName || user.email;
-
                 const email = user.email.toLowerCase().trim();
 
-                // Hae merkinnät
                 onSnapshot(query(collection(db, "merkinnat"), where("targetEmail", "==", email)), (snap) => {
                     const grid = document.getElementById('notesGrid');
                     grid.innerHTML = "";
@@ -203,7 +209,6 @@
                     });
                 });
 
-                // Hae viestit
                 onSnapshot(query(collection(db, "viestit"), where("targetEmail", "==", email)), (snap) => {
                     const list = document.getElementById('messagesList');
                     document.getElementById('msgBadge').innerText = snap.size;
@@ -227,16 +232,13 @@
             }
         });
 
-        // Kirjautumistoiminnot
         document.getElementById('googleLoginBtn').onclick = () => {
-            signInWithPopup(auth, provider).catch(err => alert("Google-kirjautumisvirhe: " + err.message));
+            signInWithPopup(auth, provider).catch(err => alert("Virhe: " + err.message));
         };
-        
         document.getElementById('emailLoginBtn').onclick = () => {
             signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passInput').value)
-            .catch(err => alert("Kirjautumisvirhe: " + err.message));
+            .catch(err => alert("Virhe: " + err.message));
         };
-        
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
     </script>
 </body>
