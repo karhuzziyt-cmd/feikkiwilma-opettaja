@@ -3,42 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wilma - Oppilas</title>
+    <title>Wilma</title>
     <style>
-        :root { --wilma-blue: #003366; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; }
-        .header { background: var(--wilma-blue); color: white; padding: 25px; text-align: center; }
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        .note { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 8px solid; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .note-title { font-weight: bold; font-size: 16px; }
-        .btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: block; margin: 10px auto; color: white; background: #4285F4; }
+        :root {
+            --wilma-blue: #003366;
+            --mint-green: #a2ffd0; /* Kuvasi mukainen mintunvihreä avatar */
+            --bg-gray: #f2f2f7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-gray);
+            margin: 0;
+            padding-bottom: 80px;
+        }
+
+        /* YLÄPALKKI */
+        .header {
+            background-color: var(--wilma-blue);
+            color: white;
+            padding: 40px 20px 30px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            background-color: var(--mint-green);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #004d40;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .section-title {
+            color: #8e8e93;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 15px 0 10px 5px;
+            text-transform: uppercase;
+        }
+
+        /* MERKINTÄKORTTI (Täsmälleen kuvasi tyyli) */
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 8px solid; /* Väri tulee Firebasesta */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .note-reason {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #000;
+        }
+
+        .note-details {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .note-comment {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+            padding-top: 10px;
+            border-top: 1px solid #f2f2f2;
+        }
+
+        .note-date {
+            font-size: 11px;
+            color: #999;
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        /* KIRJAUTUMINEN */
+        .auth-container {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .login-btn {
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 280px;
+        }
+
         .hidden { display: none; }
-        #errorLog { color: red; font-size: 10px; padding: 10px; text-align: center; }
+
+        /* ALAPALKKI */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #ddd;
+        }
+
+        .nav-item { text-align: center; font-size: 11px; color: #8e8e93; }
+        .nav-item.active { color: var(--wilma-blue); }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
-    <div id="errorLog"></div>
 
-    <div id="authPage" style="text-align: center; padding-top: 50px;">
-        <h2>Wilma</h2>
-        <p>Kirjaudu sisään sähköpostilla (Google)</p>
-        <button class="btn" id="loginGoogle">KIRJAUDU GOOGLE-TILILLÄ</button>
+    <div id="authPage" class="auth-container">
+        <h2 style="color: var(--wilma-blue); font-size: 32px;">Wilma</h2>
+        <p>Kirjaudu sisään tarkastellaksesi tiedotteita ja merkintöjä.</p>
+        <button class="login-btn" id="loginBtn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Kirjaudu Google-tilillä
+        </button>
     </div>
 
     <div id="mainPage" class="hidden">
         <div class="header">
-            <div id="userEmail"></div>
-            <a href="#" id="logout" style="color:white; font-size:12px;">Kirjaudu ulos</a>
+            <div id="avatarBox" class="avatar"></div>
+            <div id="userName" class="user-name">Ladataan...</div>
+            <div id="logoutBtn" style="font-size: 11px; margin-top: 10px; opacity: 0.7; cursor: pointer;">Kirjaudu ulos</div>
         </div>
+
         <div class="container">
-            <h4 style="color:#888;">LESSON NOTES</h4>
-            <div id="notesList"></div>
+            <div class="section-title">Lesson Notes</div>
+            <div id="notesContainer">
+                <p style="text-align: center; color: #999; margin-top: 30px;">Ei merkintöjä.</p>
+            </div>
+        </div>
+
+        <div class="footer-nav">
+            <div class="nav-item active"><div class="nav-icon">🏠</div>Koti</div>
+            <div class="nav-item"><div class="nav-icon">💬</div>Viestit</div>
+            <div class="nav-item"><div class="nav-icon">ℹ️</div>Tiedotteet</div>
+            <div class="nav-item"><div class="nav-icon">🕒</div>Työjärjestys</div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -58,24 +194,38 @@
             if (user) {
                 document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('mainPage').classList.remove('hidden');
-                document.getElementById('userEmail').innerText = user.email;
                 
-                // POISTETTU ORDERBY VÄLIAIKAISESTI ETTÄ TOIMII ILMAN INDEXIÄ
-                const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase()));
+                // Päivitä nimi ja avatar
+                document.getElementById('userName').innerText = user.displayName;
+                const initials = user.displayName.split(' ').map(n => n[0]).join('');
+                document.getElementById('avatarBox').innerText = initials;
+
+                // Hae merkinnät
+                const q = query(collection(db, "merkinnat"), where("targetEmail", "==", user.email.toLowerCase().trim()));
                 
                 onSnapshot(q, (snap) => {
-                    const list = document.getElementById('notesList');
-                    list.innerHTML = "";
+                    const container = document.getElementById('notesContainer');
+                    container.innerHTML = "";
+                    
+                    if (snap.empty) {
+                        container.innerHTML = '<p style="text-align: center; color: #999; margin-top: 30px;">Ei merkintöjä.</p>';
+                        return;
+                    }
+
                     snap.forEach(doc => {
                         const n = doc.data();
-                        list.innerHTML += `<div class="note" style="border-left-color:${n.color}">
-                            <div class="note-title">${n.reason}</div>
-                            <div style="font-size:13px; color:#666;">${n.teacher} • ${n.subject}</div>
-                            <div style="margin-top:8px;">${n.comment}</div>
-                        </div>`;
+                        const card = document.createElement('div');
+                        card.className = 'note-card';
+                        card.style.borderLeftColor = n.color;
+                        
+                        card.innerHTML = `
+                            <div class="note-reason">${n.reason}</div>
+                            <div class="note-details">${n.info || 'Ei lisätietoja'}</div>
+                            <div class="note-comment">${n.comment || ''}</div>
+                            <div class="note-date">${n.date ? n.date.toDate().toLocaleDateString('fi-FI') : ''}</div>
+                        `;
+                        container.appendChild(card);
                     });
-                }, (err) => {
-                    document.getElementById('errorLog').innerText = "ERROR: " + err.message;
                 });
             } else {
                 document.getElementById('authPage').classList.remove('hidden');
@@ -83,8 +233,8 @@
             }
         });
 
-        document.getElementById('loginGoogle').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
-        document.getElementById('logout').onclick = () => signOut(auth);
+        document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
     </script>
 </body>
 </html>
