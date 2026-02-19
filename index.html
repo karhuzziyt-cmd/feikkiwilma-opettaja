@@ -18,7 +18,6 @@
         .auth-container { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
         .wilma-logo { margin-bottom: 10px; }
         
-        /* UUSI BIO-TYYLI */
         .login-bio { 
             font-size: 14px; 
             color: var(--text-gray); 
@@ -44,7 +43,7 @@
         .container { padding: 0 15px; }
         .hidden { display: none; }
 
-        /* MERKINNÄT & VIESTIT (Samalla tavalla kuin aiemmin) */
+        /* MERKINNÄT & VIESTIT */
         .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .note-card { background: white; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; border-left: 6px solid; cursor: pointer; min-height: 95px; }
         .message-item { padding: 15px; border-bottom: 1px solid var(--border-light); cursor: pointer; }
@@ -70,7 +69,7 @@
         <div class="wilma-logo"><img src="logo.png" alt="Wilma" style="max-width: 180px;"></div>
         
         <div id="loginBio" class="login-bio">
-            Googlen kirjautuminen ei ole saatavilla juuri nyt..
+            Kirjaudu sisään sähköpostilla tai Google-tunnuksella nähdäksesi merkinnät.
         </div>
 
         <div class="login-box">
@@ -156,8 +155,14 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        /* Voit muuttaa bio-tekstiä koodista myös näin:
-           document.getElementById('loginBio').innerText = "Tämä on uusi teksti"; */
+        let isInitialLoad = true;
+
+        // ILMOITUSTOIMINTO
+        const sendNotification = (title, body) => {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png" });
+            }
+        };
 
         window.showView = (view) => {
             document.getElementById('homeView').classList.toggle('hidden', view !== 'home');
@@ -174,7 +179,7 @@
             document.getElementById('detGroup').innerText = n.subject || "Yleinen";
             document.getElementById('detTeacher').innerText = n.teacher;
             document.getElementById('detComment').innerText = n.comment || "Ei lisätietoja.";
-            document.getElementById('detDuration').innerText = n.duration || "45";
+            document.getElementById('detDuration').innerText = (n.duration || "45") + " min";
             document.getElementById('detDate').innerText = n.date ? n.date.toDate().toLocaleString('fi-FI') : "";
             document.getElementById('detailPage').style.display = "block";
         };
@@ -190,14 +195,23 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                if ("Notification" in window) Notification.requestPermission();
                 document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('mainPage').classList.remove('hidden');
                 document.getElementById('userName').innerText = user.displayName || user.email;
                 const email = user.email.toLowerCase().trim();
 
+                // MERKINNÄT SNAPSHOT
                 onSnapshot(query(collection(db, "merkinnat"), where("targetEmail", "==", email)), (snap) => {
                     const grid = document.getElementById('notesGrid');
                     grid.innerHTML = "";
+                    
+                    snap.docChanges().forEach(change => {
+                        if (change.type === "added" && !isInitialLoad) {
+                            sendNotification("Uusi Wilma-merkintä", `${change.doc.data().teacher}: ${change.doc.data().reason}`);
+                        }
+                    });
+
                     snap.forEach(doc => {
                         const n = doc.data();
                         const card = document.createElement('div');
@@ -207,11 +221,20 @@
                         card.innerHTML = `<div style="font-weight:bold">${n.reason}</div><div style="font-size:13px;color:#888;">${n.teacher}</div>`;
                         grid.appendChild(card);
                     });
+                    isInitialLoad = false;
                 });
 
+                // VIESTIT SNAPSHOT
                 onSnapshot(query(collection(db, "viestit"), where("targetEmail", "==", email)), (snap) => {
                     const list = document.getElementById('messagesList');
                     document.getElementById('msgBadge').innerText = snap.size;
+                    
+                    snap.docChanges().forEach(change => {
+                        if (change.type === "added" && !isInitialLoad) {
+                            sendNotification("Uusi Wilma-viesti", `${change.doc.data().sender}: ${change.doc.data().subject}`);
+                        }
+                    });
+
                     list.innerHTML = "";
                     snap.forEach(doc => {
                         const m = doc.data();
